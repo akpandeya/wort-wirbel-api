@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: wort-wirbel-api
+    plan: free
+    buildCommand: pip install poetry && poetry install --only=main
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.7
+      - key: PORT
+        value: 8000
+    # Auto-deploy on push to main branch
+    autoDeploy: true
+    # Environment-specific settings
+    branch: main
+    runtime: python
