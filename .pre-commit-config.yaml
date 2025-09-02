@@ -1,9 +1,17 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4  # Use the latest stable version of ruff
+    rev: v0.4.6
     hooks:
       - id: ruff
-        args: ["--fix"]
-      - id: ruff-format
-        args: ["--check"]
+        args: ["check", "app", "tests"]
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        args: ["app", "tests"]
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["app", "tests"]
 
