@@ -1,0 +1,3 @@
+"""
+Presentation layer: API endpoints and web interface
+"""

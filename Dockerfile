@@ -5,7 +5,8 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    POETRY_VERSION=1.6.1
 
 # Set work directory
 WORKDIR /app
@@ -17,11 +18,17 @@ RUN apt-get update \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.txt .
+# Install Poetry
+RUN pip install poetry==$POETRY_VERSION
 
-# Install Python dependencies
-RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir -r requirements.txt
+# Configure Poetry: Don't create virtual environment, install dependencies globally
+RUN poetry config virtualenvs.create false
+
+# Copy Poetry configuration files
+COPY pyproject.toml poetry.lock* ./
+
+# Install dependencies
+RUN poetry install --only=main --no-dev
 
 # Copy application code
 COPY app/ ./app/

@@ -5,6 +5,7 @@ Main FastAPI application module
 from fastapi import FastAPI
 
 from app import __version__
+from app.presentation.api import router
 
 app = FastAPI(
     title="Wort-Wirbel API",
@@ -12,28 +13,5 @@ app = FastAPI(
     version=__version__,
 )
 
-
-@app.get("/")
-async def hello_world():
-    """
-    Hello World endpoint
-
-    Returns:
-        dict: A simple greeting message
-    """
-    return {
-        "message": "Hello World",
-        "service": "wort-wirbel-api",
-        "version": __version__,
-    }
-
-
-@app.get("/health")
-async def health_check():
-    """
-    Health check endpoint for monitoring
-
-    Returns:
-        dict: Health status
-    """
-    return {"status": "healthy", "service": "wort-wirbel-api"}
+# Include routers
+app.include_router(router)
