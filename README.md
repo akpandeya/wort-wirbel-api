@@ -10,7 +10,7 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
 
 - 🚀 **FastAPI** - Modern, fast web framework for building APIs
 - 🧪 **Comprehensive Testing** - 100% test coverage with pytest
-- 🔍 **Code Quality** - Automated linting with Black, flake8, and isort
+- 🔍 **Code Quality** - Automated linting, formatting, and import sorting with Ruff
 - 📊 **SonarQube Integration** - Continuous code quality monitoring
 - 🔄 **CI/CD Pipeline** - Automated testing, building, and deployment
 - 🐳 **Docker Support** - Containerized application ready for deployment
@@ -75,19 +75,15 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
 
 This project enforces strict code quality standards:
 
-- **Black** - Code formatting
-- **isort** - Import sorting
-- **flake8** - Linting and style checks
+- **Ruff** - Linting, formatting, and import sorting
 - **pytest** - Testing with coverage
 
 Run quality checks:
 ```bash
-# Format code
-black app tests
-isort app tests
-
-# Check linting
-flake8 app tests
+# Lint, format, and sort imports
+ruff check app tests
+ruff format app tests
+ruff check --select I app tests
 
 # Run tests with coverage
 pytest --cov=app --cov-report=html
@@ -138,26 +134,16 @@ wort-wirbel-api/
 
 ## CI/CD Pipeline
 
-The project includes a comprehensive GitHub Actions pipeline that:
+The project uses GitHub Actions with separate workflows for:
 
-1. **Code Quality Checks**
-   - Runs Black formatter validation
-   - Checks import sorting with isort
-   - Performs linting with flake8
-   - Executes tests with coverage reporting
+1. **Code Quality Checks** (Ruff)
+2. **Testing and Coverage**
+3. **Build and API Endpoint Validation**
+4. **Deployment** (only after CI passes and only on master)
 
-2. **SonarQube Analysis**
-   - Analyzes code quality and security
-   - Tracks technical debt and maintainability
-   - Enforces quality gates
-
-3. **Build and Test**
-   - Tests application startup
-   - Validates API endpoints
-   - Builds Docker image
-
-4. **Deployment**
-   - Automatically deploys to Render on main branch pushes
+- All code quality checks run in parallel for fast feedback.
+- Tests and build jobs depend on successful code quality checks.
+- Deployment to Render is triggered only after CI passes on master.
 
 ### Setting up CI/CD
 
@@ -223,7 +209,7 @@ The application can be configured via `pyproject.toml`:
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes and ensure all tests pass
-4. Run code quality checks: `black app tests && isort app tests && flake8 app tests`
+4. Run code quality checks: `ruff check app tests && ruff format app tests`
 5. Add tests for new functionality
 6. Commit your changes: `git commit -am 'Add feature'`
 7. Push to the branch: `git push origin feature-name`
@@ -232,9 +218,7 @@ The application can be configured via `pyproject.toml`:
 ## Quality Standards
 
 - Minimum 80% test coverage required
-- All code must pass Black formatting
-- All imports must be sorted with isort
-- All code must pass flake8 linting
+- All code must pass Ruff linting, formatting, and import sorting
 - SonarQube quality gate must pass
 
 ## License
