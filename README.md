@@ -27,7 +27,8 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
    cd wort-wirbel-api
    ```
 
-2. **Set up Python environment**
+2. **Set up Python 3.13 environment**
+   Make sure you have Python 3.13 installed. You can download it from [python.org](https://www.python.org/downloads/).
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate

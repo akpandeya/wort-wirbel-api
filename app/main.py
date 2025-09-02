@@ -1,7 +1,3 @@
-"""
-Main FastAPI application module
-"""
-
 from fastapi import FastAPI
 
 from app import __version__
@@ -13,5 +9,4 @@ app = FastAPI(
     version=__version__,
 )
 
-# Include routers
 app.include_router(router)
