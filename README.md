@@ -35,7 +35,7 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
 
 3. **Install dependencies**
    ```bash
-   pip install -r requirements-dev.txt
+   poetry install
    ```
 
 4. **Run the application**
