@@ -127,9 +127,8 @@ wort-wirbel-api/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml         # GitHub Actions CI/CD pipeline
-├── requirements.txt       # Production dependencies
-├── requirements-dev.txt   # Development dependencies
 ├── pyproject.toml         # Project configuration
+├── poetry.lock            # Poetry lock file (exact dependency versions)
 ├── sonar-project.properties # SonarQube configuration
 ├── Dockerfile            # Docker container configuration
 ├── render.yaml           # Render deployment configuration
