@@ -8,10 +8,10 @@ This document outlines the core principles and practices for writing high-qualit
 
 Our approach is centered on the business domain. Your primary goal is to write code that clearly expresses the domain model.
 
-* **Ubiquitous Language**: Use names for classes, methods, and variables that come directly from the business domain. If the business calls it a "Customer Mandate," don't call it a `ClientAgreement`.
-* **Model the Domain**: Structure the code around core domain concepts. Help identify and create **Entities**, **Value Objects**, **Aggregates**, and **Repositories**.
+* **Ubiquitous Language**: Use names for classes, methods, and variables that come directly from the business domain. If the business calls it a "Dictionary Entry," don't call it a `WordRecord`.
+* **Model the Domain**: Structure the code around core domain concepts. Help identify and create **Entities** (e.g., `DictionaryEntry`), **Value Objects** (e.g., `WordTranslation`), **Aggregates**, and **Repositories** (e.g., `LanguageRepository`).
 * **Bounded Contexts**: Keep domain logic isolated within its specific bounded context. Avoid creating dependencies that cross these boundaries unnecessarily.
-* **Focus on Behavior**: Methods on domain objects should represent real business operations, not just simple getters and setters (e.g., `customer.deactivate()` instead of `customer.setStatus('inactive')`).
+* **Focus on Behavior**: Methods on domain objects should represent real business operations, not just simple getters and setters (e.g., `dictionary_entry.add_translation('de', 'Apfel')` instead of `dictionary_entry.set_translation('de', 'Apfel')`).
 
 ***
 
@@ -23,7 +23,7 @@ All new functionality must be developed using a strict TDD workflow. Tests are n
     1.  🔴 **Red**: Write a simple, failing test for a small piece of functionality.
     2.  🟢 **Green**: Write the *absolute minimum* amount of code required to make the test pass.
     3.  🔵 **Refactor**: Clean up the code you just wrote, ensuring it is clear, efficient, and well-designed, while all tests remain green.
-* **Descriptive Tests**: Test names should clearly describe the behavior they are testing (e.g., `test_throws_exception_when_placing_order_with_insufficient_stock`).
+* **Descriptive Tests**: Test names should clearly describe the behavior they are testing (e.g., `test_returns_translation_for_existing_language` or `test_raises_error_when_adding_duplicate_word`).
 * **One Assertion Per Test**: Ideally, each test should verify a single logical outcome.
 
 ***
