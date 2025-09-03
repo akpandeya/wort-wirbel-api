@@ -2,28 +2,41 @@
 
 ## Overview
 
-The Wort-Wirbel API uses a PostgreSQL database to store vocabulary/grammar words. The database follows a simple relational schema designed for efficient storage and retrieval of word data.
+The Wort-Wirbel API uses a PostgreSQL database to store comprehensive vocabulary/grammar words with multi-language support, learning progress tracking, and rich metadata. The database follows a comprehensive schema designed for efficient storage and retrieval of word data according to the specification in issue #33.
 
 ## Schema Design
 
 ### Words Table
 
-The `words` table is the core table for storing vocabulary words and their metadata.
+The `words` table is the core table for storing vocabulary words and their comprehensive metadata.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | INTEGER | PRIMARY KEY, AUTO INCREMENT | Unique identifier for each word |
-| `word` | STRING | NOT NULL, INDEX | The actual word text |
-| `definition` | STRING | NOT NULL | Definition or meaning of the word |
-| `part_of_speech` | ENUM | NOT NULL | Grammatical part of speech |
-| `difficulty` | ENUM | NOT NULL | Learning difficulty level |
+| `id` | STRING | PRIMARY KEY | Unique identifier in format `{lang}:{lemma}:{variant_id}` |
+| `lemma` | STRING | NOT NULL, INDEX | Canonical form of the word |
+| `lang` | STRING | NOT NULL, INDEX | Language code (e.g., "de", "en") |
+| `pos` | ENUM | NOT NULL | Grammatical part of speech |
+| `pos_specific` | STRING | NULLABLE | Language-specific part of speech |
+| `defs` | JSON | NOT NULL | Array of definitions |
+| `synonyms` | JSON | NULLABLE | Array of synonyms |
+| `examples` | JSON | NULLABLE | Array of usage examples with translations |
+| `freq_rank` | INTEGER | NULLABLE | Frequency ranking |
+| `cefr` | ENUM | NULLABLE | Common European Framework level (A1-C2) |
+| `gender` | ENUM | NULLABLE | Grammatical gender |
+| `plural` | STRING | NULLABLE | Plural form |
+| `audio` | TEXT | NULLABLE | Audio URL |
+| `src` | STRING | NULLABLE | Source identifier |
+| `success_streak` | INTEGER | DEFAULT 0 | Number of consecutive correct answers |
+| `last_reviewed_at` | DATETIME | NULLABLE | Last review timestamp |
+| `next_review_at` | DATETIME | NULLABLE | Next scheduled review timestamp |
+| `created_at` | DATETIME | NOT NULL, AUTO | Creation timestamp |
 | `updated_at` | DATETIME | NOT NULL, AUTO UPDATE | Last modification timestamp |
 
 ### Enumerations
 
 #### Part of Speech
 - `noun`
-- `verb`
+- `verb` 
 - `adjective`
 - `adverb`
 - `pronoun`
@@ -31,12 +44,22 @@ The `words` table is the core table for storing vocabulary words and their metad
 - `conjunction`
 - `interjection`
 - `article`
+- `determiner`
+- `particle`
 - `other`
 
-#### Difficulty Level
-- `beginner`
-- `intermediate`
-- `advanced`
+#### CEFR Level (Common European Framework)
+- `A1` - Beginner
+- `A2` - Elementary  
+- `B1` - Intermediate
+- `B2` - Upper Intermediate
+- `C1` - Advanced
+- `C2` - Proficient
+
+#### Gender
+- `masculine`
+- `feminine` 
+- `neuter`
 
 ## Database Configuration
 
@@ -52,7 +75,7 @@ The database connection is configured via environment variables:
 
 ## Migrations
 
-Database migrations are managed using Alembic. To create and apply migrations:
+Database migrations are managed using Alembic and stored in the `migrations/` folder. To create and apply migrations:
 
 ```bash
 # Create a new migration
@@ -71,26 +94,40 @@ poetry run alembic downgrade -1
 
 ```sql
 CREATE TABLE words (
-    id SERIAL PRIMARY KEY,
-    word VARCHAR NOT NULL,
-    definition VARCHAR NOT NULL,
-    part_of_speech ENUM('noun', 'verb', 'adjective', 'adverb', 'pronoun', 
-                        'preposition', 'conjunction', 'interjection', 'article', 'other') NOT NULL,
-    difficulty ENUM('beginner', 'intermediate', 'advanced') NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    id VARCHAR PRIMARY KEY,
+    lemma VARCHAR NOT NULL,
+    lang VARCHAR NOT NULL,
+    pos ENUM('NOUN', 'VERB', 'ADJECTIVE', 'ADVERB', 'PRONOUN', 'PREPOSITION', 
+             'CONJUNCTION', 'INTERJECTION', 'ARTICLE', 'DETERMINER', 'PARTICLE', 'OTHER') NOT NULL,
+    pos_specific VARCHAR,
+    defs JSON NOT NULL,
+    synonyms JSON,
+    examples JSON,
+    freq_rank INTEGER,
+    cefr ENUM('A1', 'A2', 'B1', 'B2', 'C1', 'C2'),
+    gender ENUM('MASCULINE', 'FEMININE', 'NEUTER'),
+    plural VARCHAR,
+    audio TEXT,
+    src VARCHAR,
+    success_streak INTEGER DEFAULT 0,
+    last_reviewed_at TIMESTAMP,
+    next_review_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX ix_words_word ON words(word);
 CREATE INDEX ix_words_id ON words(id);
+CREATE INDEX ix_words_lemma ON words(lemma);
+CREATE INDEX ix_words_lang ON words(lang);
 ```
 
 ### Sample Data
 
 ```sql
-INSERT INTO words (word, definition, part_of_speech, difficulty) VALUES
-('apple', 'A round fruit with red or green skin', 'noun', 'beginner'),
-('run', 'To move quickly on foot', 'verb', 'beginner'),
-('beautiful', 'Pleasing to look at', 'adjective', 'intermediate');
+INSERT INTO words (id, lemma, lang, pos, defs, cefr, created_at, updated_at) VALUES
+('de:hallo:1', 'Hallo', 'de', 'INTERJECTION', '["hello", "hi"]', 'A1', NOW(), NOW()),
+('en:house:1', 'house', 'en', 'NOUN', '["a building for human habitation", "dwelling"]', 'A1', NOW(), NOW()),
+('de:haus:1', 'Haus', 'de', 'NOUN', '["house", "building"]', 'A1', NOW(), NOW());
 ```
 
 ## Repository Pattern
@@ -107,3 +144,33 @@ This pattern provides:
 - Easy testing with mock repositories
 - Database implementation flexibility
 - Type safety with Python typing
+
+## JSON Field Structure
+
+### Examples Field
+```json
+[
+  {"text": "Hallo Welt!", "tr": "Hello world!"},
+  {"text": "Hallo, wie geht's?", "tr": "Hello, how are you?"}
+]
+```
+
+### Definitions Field
+```json
+["hello", "hi", "greeting"]
+```
+
+### Synonyms Field  
+```json
+["hi", "guten Tag", "servus"]
+```
+
+## Learning Progress Integration
+
+The schema includes built-in support for spaced repetition learning:
+
+- **success_streak**: Tracks consecutive correct answers
+- **last_reviewed_at**: When the word was last studied
+- **next_review_at**: When the word should be reviewed next
+
+This enables implementation of spaced repetition algorithms directly in the database layer.
