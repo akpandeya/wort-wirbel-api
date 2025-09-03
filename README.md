@@ -8,6 +8,16 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
 
 ## Features
 
+- **FastAPI Framework**: Modern, fast web framework for building APIs
+- **Database Integration**: PostgreSQL database with SQLAlchemy 2 ORM
+- **Word Management**: CRUD operations for vocabulary/grammar words
+- **Domain-Driven Design**: Clean architecture with domain, application, and infrastructure layers
+- **Repository Pattern**: Abstracted data access with interface-based design  
+- **Database Migrations**: Alembic for database schema management
+- **Comprehensive Testing**: Unit and integration tests with 80%+ coverage
+- **Code Quality**: Automated linting with Ruff, formatting, and type hints
+- **CI/CD Pipeline**: GitHub Actions for automated testing and deployment
+
 - 🚀 **FastAPI** - Modern, fast web framework for building APIs
 - 🧪 **Comprehensive Testing** - 100% test coverage with pytest
 - 🔍 **Code Quality** - Automated linting, formatting, and import sorting with Ruff
@@ -43,7 +53,18 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
-5. **Access the API**
+5. **Set up the database (optional)**
+   
+   If you want to use the database features, start a PostgreSQL instance:
+   ```bash
+   # Using Docker
+   docker run --name postgres-wort-wirbel -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=wort_wirbel -p 5432:5432 -d postgres:15
+   
+   # Run database migrations
+   poetry run alembic upgrade head
+   ```
+
+6. **Access the API**
    - API: http://localhost:8000
    - Interactive API docs: http://localhost:8000/docs
    - Alternative API docs: http://localhost:8000/redoc
@@ -104,15 +125,30 @@ wort-wirbel-api/
 ├── app/                    # Application code
 │   ├── __init__.py
 │   ├── main.py            # FastAPI application and routes
-│   └── routers/           # Additional route modules
+│   ├── domain/            # Domain models and business logic
+│   │   └── models.py      # Pydantic domain models (Word, enums)
+│   ├── application/       # Use cases and application services
+│   │   └── services.py    # Business logic services
+│   ├── infrastructure/    # Infrastructure concerns
+│   │   ├── config.py      # Configuration management
+│   │   ├── database/      # Database setup and SQLAlchemy models
+│   │   └── repositories/  # Data access layer
+│   └── presentation/      # API layer
+│       └── api.py         # FastAPI routes
 ├── tests/                 # Test files
 │   ├── __init__.py
-│   └── test_main.py       # Main application tests
+│   ├── test_*.py          # Unit and integration tests
+├── alembic/               # Database migrations
+│   ├── versions/          # Migration files
+│   └── env.py            # Alembic configuration
+├── docs/                  # Documentation
+│   └── database_schema.md # Database schema documentation
 ├── .github/
 │   └── workflows/
 │       └── ci.yml         # GitHub Actions CI/CD pipeline
 ├── pyproject.toml         # Project configuration
 ├── poetry.lock            # Poetry lock file (exact dependency versions)
+├── alembic.ini           # Alembic migration configuration
 ├── sonar-project.properties # SonarQube configuration
 ├── render.yaml           # Render deployment configuration
 └── README.md             # This file
@@ -168,6 +204,14 @@ The `render.yaml` file in the repository root contains the complete deployment c
 
 - `PORT` - Server port (default: 8000)
 - `PYTHON_VERSION` - Python version (default: 3.12.3)
+
+#### Database Configuration
+
+- `DB_HOST` - Database host (default: localhost)
+- `DB_PORT` - Database port (default: 5432)  
+- `DB_NAME` - Database name (default: wort_wirbel)
+- `DB_USER` - Database username (default: postgres)
+- `DB_PASSWORD` - Database password (default: postgres)
 
 ### Application Configuration
 
