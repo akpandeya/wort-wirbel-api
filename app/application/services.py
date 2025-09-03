@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from app import __version__
 from app.domain.models import HealthStatus, ServiceInfo, Word
@@ -27,20 +28,20 @@ class WordService:
 
     def create_word(self, word: Word) -> Word:
         """Create a new word"""
-        # Check if word already exists
-        existing_word = self.word_repository.get_by_word(word=word.word)
+        # Check if word already exists for the same language
+        existing_word = self.word_repository.get_by_word(word=word.word, language=word.language)
         if existing_word:
-            raise ValueError(f"Word '{word.word}' already exists")
+            raise ValueError(f"Word '{word.word}' already exists for language '{word.language}'")
         
         return self.word_repository.create(word=word)
 
-    def get_word_by_id(self, word_id: int) -> Optional[Word]:
+    def get_word_by_id(self, word_id: UUID) -> Optional[Word]:
         """Get a word by ID"""
         return self.word_repository.get_by_id(word_id=word_id)
 
-    def get_word_by_word(self, word: str) -> Optional[Word]:
-        """Get a word by the word text"""
-        return self.word_repository.get_by_word(word=word)
+    def get_word_by_word(self, word: str, language: str) -> Optional[Word]:
+        """Get a word by the word text and language"""
+        return self.word_repository.get_by_word(word=word, language=language)
 
     def get_all_words(self) -> List[Word]:
         """Get all words"""
@@ -58,6 +59,6 @@ class WordService:
         
         return self.word_repository.update(word=word)
 
-    def delete_word(self, word_id: int) -> bool:
+    def delete_word(self, word_id: UUID) -> bool:
         """Delete a word by ID"""
         return self.word_repository.delete(word_id=word_id)

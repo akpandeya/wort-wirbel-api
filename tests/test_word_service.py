@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from uuid import uuid4
 
 from app.application.services import WordService
 from app.domain.models import DifficultyLevel, PartOfSpeech, Word
@@ -22,11 +23,12 @@ def word_service(mock_word_repository):
 def sample_word():
     """Create a sample word for testing"""
     return Word(
-        id=1,
+        id=uuid4(),
         word="test",
         definition="a test word",
         part_of_speech=PartOfSpeech.NOUN,
         difficulty=DifficultyLevel.BEGINNER,
+        language="en",
     )
 
 
@@ -41,6 +43,7 @@ class TestWordService:
             definition="a test word",
             part_of_speech=PartOfSpeech.NOUN,
             difficulty=DifficultyLevel.BEGINNER,
+            language="en",
         )
         mock_word_repository.get_by_word.return_value = None
         mock_word_repository.create.return_value = sample_word
@@ -50,7 +53,7 @@ class TestWordService:
         
         # Assert
         assert result == sample_word
-        mock_word_repository.get_by_word.assert_called_once_with(word="test")
+        mock_word_repository.get_by_word.assert_called_once_with(word="test", language="en")
         mock_word_repository.create.assert_called_once_with(word=new_word)
 
     def test_create_word_already_exists(self, word_service, mock_word_repository, sample_word):
@@ -61,14 +64,15 @@ class TestWordService:
             definition="a test word",
             part_of_speech=PartOfSpeech.NOUN,
             difficulty=DifficultyLevel.BEGINNER,
+            language="en",
         )
         mock_word_repository.get_by_word.return_value = sample_word
         
         # Execute & Assert
-        with pytest.raises(ValueError, match="Word 'test' already exists"):
+        with pytest.raises(ValueError, match="Word 'test' already exists for language 'en'"):
             word_service.create_word(new_word)
         
-        mock_word_repository.get_by_word.assert_called_once_with(word="test")
+        mock_word_repository.get_by_word.assert_called_once_with(word="test", language="en")
         mock_word_repository.create.assert_not_called()
 
     def test_get_word_by_id(self, word_service, mock_word_repository, sample_word):
@@ -77,11 +81,11 @@ class TestWordService:
         mock_word_repository.get_by_id.return_value = sample_word
         
         # Execute
-        result = word_service.get_word_by_id(1)
+        result = word_service.get_word_by_id(sample_word.id)
         
         # Assert
         assert result == sample_word
-        mock_word_repository.get_by_id.assert_called_once_with(word_id=1)
+        mock_word_repository.get_by_id.assert_called_once_with(word_id=sample_word.id)
 
     def test_get_word_by_word(self, word_service, mock_word_repository, sample_word):
         """Test getting a word by word text"""
@@ -89,11 +93,11 @@ class TestWordService:
         mock_word_repository.get_by_word.return_value = sample_word
         
         # Execute
-        result = word_service.get_word_by_word("test")
+        result = word_service.get_word_by_word("test", "en")
         
         # Assert
         assert result == sample_word
-        mock_word_repository.get_by_word.assert_called_once_with(word="test")
+        mock_word_repository.get_by_word.assert_called_once_with(word="test", language="en")
 
     def test_get_all_words(self, word_service, mock_word_repository, sample_word):
         """Test getting all words"""
@@ -119,7 +123,7 @@ class TestWordService:
         
         # Assert
         assert result == sample_word
-        mock_word_repository.get_by_id.assert_called_once_with(word_id=1)
+        mock_word_repository.get_by_id.assert_called_once_with(word_id=sample_word.id)
         mock_word_repository.update.assert_called_once_with(word=sample_word)
 
     def test_update_word_without_id(self, word_service, mock_word_repository):
@@ -130,6 +134,7 @@ class TestWordService:
             definition="a test word",
             part_of_speech=PartOfSpeech.NOUN,
             difficulty=DifficultyLevel.BEGINNER,
+            language="en",
         )
         
         # Execute & Assert
@@ -145,10 +150,10 @@ class TestWordService:
         mock_word_repository.get_by_id.return_value = None
         
         # Execute & Assert
-        with pytest.raises(ValueError, match="Word with ID 1 not found"):
+        with pytest.raises(ValueError, match=f"Word with ID {sample_word.id} not found"):
             word_service.update_word(sample_word)
         
-        mock_word_repository.get_by_id.assert_called_once_with(word_id=1)
+        mock_word_repository.get_by_id.assert_called_once_with(word_id=sample_word.id)
         mock_word_repository.update.assert_not_called()
 
     def test_delete_word(self, word_service, mock_word_repository):
@@ -157,8 +162,8 @@ class TestWordService:
         mock_word_repository.delete.return_value = True
         
         # Execute
-        result = word_service.delete_word(1)
+        result = word_service.delete_word(sample_word.id)
         
         # Assert
         assert result is True
-        mock_word_repository.delete.assert_called_once_with(word_id=1)
+        mock_word_repository.delete.assert_called_once_with(word_id=sample_word.id)

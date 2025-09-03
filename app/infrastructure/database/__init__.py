@@ -14,11 +14,27 @@ class Base(DeclarativeBase):
 
 
 class Database:
-    """Database session management"""
+    """Database session management with singleton pattern"""
+    
+    _instance = None
+    _lock = None
 
-    def __init__(self, config: DbConfig):
+    def __new__(cls, config: DbConfig = None):
+        if cls._instance is None:
+            cls._instance = super(Database, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self, config: DbConfig = None):
+        if self._initialized:
+            return
+        
+        if config is None:
+            config = DbConfig.from_env()
+            
         self.engine = create_engine(config.connection_string)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self._initialized = True
 
     def get_session(self):
         """Get a database session"""
@@ -33,17 +49,9 @@ class Database:
         Base.metadata.create_all(bind=self.engine)
 
 
-# Global database instance
-_database = None
-
-
 def get_database() -> Database:
-    """Get the global database instance"""
-    global _database
-    if _database is None:
-        config = DbConfig.from_env()
-        _database = Database(config)
-    return _database
+    """Get the database instance (singleton)"""
+    return Database()
 
 
 def get_db_session():

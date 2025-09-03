@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -41,9 +42,11 @@ class HealthStatus(BaseModel):
 class Word(BaseModel):
     """Word domain model"""
 
-    id: int | None = None
+    id: UUID | None = None
     word: str
     definition: str
     part_of_speech: PartOfSpeech
     difficulty: DifficultyLevel
+    language: str
+    created_at: datetime | None = None
     updated_at: datetime | None = None

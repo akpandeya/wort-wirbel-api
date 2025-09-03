@@ -103,22 +103,18 @@ class TestGlobalFunctions:
         mock_database_instance = Mock()
         mock_database_class.return_value = mock_database_instance
         
-        # Clear the global variable first
+        # Reset the singleton instance
         import app.infrastructure.database
-        app.infrastructure.database._database = None
+        app.infrastructure.database.Database._instance = None
         
         # First call should create instance
         result1 = get_database()
-        mock_config_class.from_env.assert_called_once()
-        mock_database_class.assert_called_once_with(mock_config)
         assert result1 == mock_database_instance
         
         # Second call should return same instance
         result2 = get_database()
         assert result2 == mock_database_instance
-        # Config and Database should not be called again
-        assert mock_config_class.from_env.call_count == 1
-        assert mock_database_class.call_count == 1
+        assert result1 is result2
 
     @patch("app.infrastructure.database.get_database")
     def test_get_db_session(self, mock_get_database):

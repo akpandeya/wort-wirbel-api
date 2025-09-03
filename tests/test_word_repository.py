@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from testcontainers.postgres import PostgresContainer
+from uuid import uuid4
 
 from app.domain.models import DifficultyLevel, PartOfSpeech, Word
 from app.infrastructure.database import Base
@@ -31,14 +32,10 @@ def db_session(database_engine):
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=database_engine)
     session = SessionLocal()
     
-    # Start a transaction
-    transaction = session.begin()
-    
     try:
         yield session
     finally:
-        # Always rollback the transaction to ensure test isolation
-        transaction.rollback()
+        session.rollback()
         session.close()
 
 
@@ -56,6 +53,7 @@ def sample_word():
         definition="a test word",
         part_of_speech=PartOfSpeech.NOUN,
         difficulty=DifficultyLevel.BEGINNER,
+        language="en",
     )
 
 
@@ -67,10 +65,13 @@ class TestSqlWordRepository:
         created_word = word_repository.create(sample_word)
         
         assert created_word.id is not None
+        assert isinstance(created_word.id, type(uuid4()))
         assert created_word.word == sample_word.word
         assert created_word.definition == sample_word.definition
         assert created_word.part_of_speech == sample_word.part_of_speech
         assert created_word.difficulty == sample_word.difficulty
+        assert created_word.language == sample_word.language
+        assert created_word.created_at is not None
         assert created_word.updated_at is not None
 
     def test_get_by_id_existing_word(self, word_repository, sample_word):
@@ -90,18 +91,18 @@ class TestSqlWordRepository:
         assert retrieved_word is None
 
     def test_get_by_word_existing(self, word_repository, sample_word):
-        """Test getting a word by word text when it exists"""
+        """Test getting a word by word text and language when it exists"""
         created_word = word_repository.create(sample_word)
         
-        retrieved_word = word_repository.get_by_word(sample_word.word)
+        retrieved_word = word_repository.get_by_word(sample_word.word, sample_word.language)
         
         assert retrieved_word is not None
         assert retrieved_word.id == created_word.id
         assert retrieved_word.word == created_word.word
 
     def test_get_by_word_nonexistent(self, word_repository):
-        """Test getting a word by word text when it doesn't exist"""
-        retrieved_word = word_repository.get_by_word("nonexistent")
+        """Test getting a word by word text and language when it doesn't exist"""
+        retrieved_word = word_repository.get_by_word("nonexistent", "en")
         
         assert retrieved_word is None
 
@@ -119,6 +120,7 @@ class TestSqlWordRepository:
             definition="another test word",
             part_of_speech=PartOfSpeech.VERB,
             difficulty=DifficultyLevel.INTERMEDIATE,
+            language="en",
         ))
         
         words = word_repository.get_all()
