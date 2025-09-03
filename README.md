@@ -13,7 +13,6 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
 - 🔍 **Code Quality** - Automated linting, formatting, and import sorting with Ruff
 - 📊 **SonarQube Integration** - Continuous code quality monitoring
 - 🔄 **CI/CD Pipeline** - Automated testing, building, and deployment
-- 🐳 **Docker Support** - Containerized application ready for deployment
 - 🌐 **Render Deployment** - Automatic deployment to Render cloud platform
 - 📚 **API Documentation** - Interactive OpenAPI/Swagger documentation
 
@@ -49,18 +48,6 @@ A FastAPI-based REST API for the Wort-Wirbel application with automated CI/CD, c
    - Interactive API docs: http://localhost:8000/docs
    - Alternative API docs: http://localhost:8000/redoc
    - Health check: http://localhost:8000/health
-
-### Using Docker
-
-1. **Build the Docker image**
-   ```bash
-   docker build -t wort-wirbel-api .
-   ```
-
-2. **Run the container**
-   ```bash
-   docker run -p 8000:8000 wort-wirbel-api
-   ```
 
 ## API Endpoints
 
@@ -127,7 +114,6 @@ wort-wirbel-api/
 ├── pyproject.toml         # Project configuration
 ├── poetry.lock            # Poetry lock file (exact dependency versions)
 ├── sonar-project.properties # SonarQube configuration
-├── Dockerfile            # Docker container configuration
 ├── render.yaml           # Render deployment configuration
 └── README.md             # This file
 ```
@@ -175,18 +161,6 @@ The application is configured for automatic deployment to Render:
    - `PYTHON_VERSION`: `3.12.3`
 
 The `render.yaml` file in the repository root contains the complete deployment configuration.
-
-### Manual Docker Deployment
-
-1. **Build and tag the image**:
-   ```bash
-   docker build -t wort-wirbel-api:latest .
-   ```
-
-2. **Run the container**:
-   ```bash
-   docker run -d -p 8000:8000 --name wort-wirbel-api wort-wirbel-api:latest
-   ```
 
 ## Configuration
 

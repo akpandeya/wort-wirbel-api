@@ -24,7 +24,7 @@ jobs:
       - name: Run Pytest
         run: poetry run pytest --maxfail=1 --disable-warnings
       - name: SonarQube Analysis
-        uses: SonarSource/sonarcloud-github-action@v5
+        uses: SonarSource/sonarqube-scan-action@v5
         with:
           projectBaseDir: .
         env:
