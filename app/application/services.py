@@ -1,5 +1,4 @@
 from typing import List, Optional
-from uuid import UUID
 
 from app import __version__
 from app.domain.models import HealthStatus, ServiceInfo, Word
@@ -29,19 +28,19 @@ class WordService:
     def create_word(self, word: Word) -> Word:
         """Create a new word"""
         # Check if word already exists for the same language
-        existing_word = self.word_repository.get_by_word(word=word.word, language=word.language)
+        existing_word = self.word_repository.get_by_lemma(lemma=word.lemma, language=word.lang)
         if existing_word:
-            raise ValueError(f"Word '{word.word}' already exists for language '{word.language}'")
+            raise ValueError(f"Word '{word.lemma}' already exists for language '{word.lang}'")
         
         return self.word_repository.create(word=word)
 
-    def get_word_by_id(self, word_id: UUID) -> Optional[Word]:
+    def get_word_by_id(self, word_id: str) -> Optional[Word]:
         """Get a word by ID"""
         return self.word_repository.get_by_id(word_id=word_id)
 
-    def get_word_by_word(self, word: str, language: str) -> Optional[Word]:
-        """Get a word by the word text and language"""
-        return self.word_repository.get_by_word(word=word, language=language)
+    def get_word_by_lemma(self, lemma: str, language: str) -> Optional[Word]:
+        """Get a word by lemma and language"""
+        return self.word_repository.get_by_lemma(lemma=lemma, language=language)
 
     def get_all_words(self) -> List[Word]:
         """Get all words"""
@@ -49,7 +48,7 @@ class WordService:
 
     def update_word(self, word: Word) -> Word:
         """Update an existing word"""
-        if word.id is None:
+        if not word.id:
             raise ValueError("Word ID is required for update")
         
         # Check if word exists
@@ -59,6 +58,6 @@ class WordService:
         
         return self.word_repository.update(word=word)
 
-    def delete_word(self, word_id: UUID) -> bool:
+    def delete_word(self, word_id: str) -> bool:
         """Delete a word by ID"""
         return self.word_repository.delete(word_id=word_id)
