@@ -5,9 +5,13 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from app.infrastructure.config import DbConfig
+
 # Import our models so Alembic can detect them
 from app.infrastructure.database import Base
-from app.infrastructure.database.models import WordModel
+
+# Import WordModel so Alembic can detect schema changes via autogenerate
+from app.infrastructure.database.models import WordModel  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -17,6 +21,9 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+config.set_main_option("sqlalchemy.url", DbConfig.from_env().sqlalchemy_url)
+
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -68,9 +75,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

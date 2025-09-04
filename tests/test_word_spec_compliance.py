@@ -48,26 +48,3 @@ def test_word_matches_issue_33_spec():
     assert "examples" in word_dict
     assert word_dict["examples"][0]["text"] == "Hallo Welt!"
     assert word_dict["examples"][0]["tr"] == "Hello world!"
-
-
-def test_word_with_learning_fields():
-    from datetime import timedelta
-
-    now = datetime.now()
-    future = now + timedelta(days=1)
-
-    word = Word(
-        lemma="lernen",
-        lang="de",
-        pos=PartOfSpeech.VERB,
-        defs=["to learn", "to study"],
-        success_streak=5,
-        last_reviewed_at=now,
-        next_review_at=future,
-        cefr=CEFRLevel.A2,
-    )
-
-    assert word.success_streak == 5
-    assert word.last_reviewed_at == now
-    assert word.next_review_at == future
-    assert word.cefr == CEFRLevel.A2

@@ -209,7 +209,7 @@ The `render.yaml` file in the repository root contains the complete deployment c
 
 - `DB_HOST` - Database host (default: localhost)
 - `DB_PORT` - Database port (default: 5432)  
-- `DB_NAME` - Database name (default: wort_wirbel)
+- `DB_NAME` - Database name (default: postgres)
 - `DB_USER` - Database username (default: postgres)
 - `DB_PASSWORD` - Database password (default: postgres)
 

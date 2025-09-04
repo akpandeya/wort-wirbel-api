@@ -11,8 +11,6 @@ async def word_repository(db_session):
     return SqlWordRepository(db_session)
 
 
-import uuid
-
 @pytest.fixture
 def sample_word():
     """Create a sample word for testing."""

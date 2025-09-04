@@ -32,9 +32,6 @@ def test_word_creation_comprehensive():
         plural=None,
         audio="https://cdn.example.com/audio/de/hallo.mp3",
         src="dict-api-v1",
-        success_streak=0,
-        last_reviewed_at=None,
-        next_review_at=None,
     )
     assert word.id == "de:hallo:abc123"
     assert word.lemma == "Hallo"
@@ -52,9 +49,6 @@ def test_word_creation_comprehensive():
     assert word.plural is None
     assert word.audio == "https://cdn.example.com/audio/de/hallo.mp3"
     assert word.src == "dict-api-v1"
-    assert word.success_streak == 0
-    assert word.last_reviewed_at is None
-    assert word.next_review_at is None
 
 
 def test_word_creation_with_gender():

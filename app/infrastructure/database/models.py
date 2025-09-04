@@ -5,7 +5,7 @@ from app.infrastructure.database import Base
 
 
 class WordModel(Base):
-    __tablename__ = "words"
+    __tablename__ = "word"
 
     id = Column(String, primary_key=True, index=True)
     lemma = Column(String, nullable=False, index=True)
@@ -21,9 +21,6 @@ class WordModel(Base):
     plural = Column(String, nullable=True)
     audio = Column(Text, nullable=True)
     src = Column(String, nullable=True)
-    success_streak = Column(Integer, default=0, nullable=True)
-    last_reviewed_at = Column(DateTime, nullable=True)
-    next_review_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(
         DateTime, default=func.now(), onupdate=func.now(), nullable=False

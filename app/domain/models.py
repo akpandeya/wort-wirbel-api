@@ -52,31 +52,19 @@ class Example(BaseModel):
 
 
 class Word(BaseModel):
-    # Core identification
     id: Optional[str] = None
     lemma: str
     lang: str
-    # Part of speech information
     pos: PartOfSpeech
     pos_specific: Optional[str] = None
-    # Definitions and synonyms
     defs: List[str]
     synonyms: Optional[List[str]] = None
-    # Examples
     examples: Optional[List[Example]] = None
-    # Difficulty and frequency
     freq_rank: Optional[int] = None
     cefr: Optional[CEFRLevel] = None
-    # Grammatical information
     gender: Optional[Gender] = None
     plural: Optional[str] = None
-    # Media and source
     audio: Optional[str] = None
     src: Optional[str] = None
-    # Learning progress fields
-    success_streak: Optional[int] = None
-    last_reviewed_at: Optional[datetime] = None
-    next_review_at: Optional[datetime] = None
-    # Temporal tracking
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

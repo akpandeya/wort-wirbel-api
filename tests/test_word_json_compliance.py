@@ -123,9 +123,6 @@ def test_comprehensive_schema_coverage():
         plural="houses",
         audio="https://cdn.example.com/audio/en/house.mp3",
         src="cambridge-dict-v2",
-        success_streak=3,
-        last_reviewed_at=datetime.now(),
-        next_review_at=datetime.now(),
         created_at=datetime.now(),
         updated_at=datetime.now(),
     )
@@ -144,9 +141,6 @@ def test_comprehensive_schema_coverage():
     assert word.plural == "houses"
     assert word.audio.endswith("house.mp3")
     assert word.src == "cambridge-dict-v2"
-    assert word.success_streak == 3
-    assert word.last_reviewed_at is not None
-    assert word.next_review_at is not None
     assert word.created_at is not None
     assert word.updated_at is not None
 

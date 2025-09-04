@@ -64,9 +64,6 @@ class SqlWordRepository(WordRepositoryInterface):
             plural=word.plural,
             audio=word.audio,
             src=word.src,
-            success_streak=word.success_streak,
-            last_reviewed_at=word.last_reviewed_at,
-            next_review_at=word.next_review_at,
         )
         self.session.add(db_word)
         await self.session.commit()
@@ -117,9 +114,6 @@ class SqlWordRepository(WordRepositoryInterface):
         db_word.plural = word.plural
         db_word.audio = word.audio
         db_word.src = word.src
-        db_word.success_streak = word.success_streak
-        db_word.last_reviewed_at = word.last_reviewed_at
-        db_word.next_review_at = word.next_review_at
         db_word.updated_at = datetime.now().replace(tzinfo=None)
         await self.session.commit()
         await self.session.refresh(db_word)
@@ -157,9 +151,6 @@ class SqlWordRepository(WordRepositoryInterface):
             plural=db_word.plural,
             audio=db_word.audio,
             src=db_word.src,
-            success_streak=db_word.success_streak,
-            last_reviewed_at=db_word.last_reviewed_at,
-            next_review_at=db_word.next_review_at,
             created_at=db_word.created_at,
             updated_at=db_word.updated_at,
         )

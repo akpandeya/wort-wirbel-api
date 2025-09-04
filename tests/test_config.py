@@ -15,7 +15,7 @@ class TestDbConfig:
             config = DbConfig.from_env()
             assert config.host == "localhost"
             assert config.port == 5432
-            assert config.database == "wort_wirbel"
+            assert config.database == "postgres"
             assert config.username == "postgres"
             assert config.password == "postgres"
         finally:
