@@ -1,14 +1,11 @@
 from datetime import datetime
 from enum import Enum
 from typing import Optional, List
-from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class PartOfSpeech(str, Enum):
-    """Part of speech enumeration"""
-
     NOUN = "noun"
     VERB = "verb"
     ADJECTIVE = "adjective"
@@ -24,8 +21,6 @@ class PartOfSpeech(str, Enum):
 
 
 class CEFRLevel(str, Enum):
-    """Common European Framework of Reference for Languages levels"""
-    
     A1 = "A1"
     A2 = "A2"
     B1 = "B1"
@@ -35,8 +30,6 @@ class CEFRLevel(str, Enum):
 
 
 class Gender(str, Enum):
-    """Grammatical gender enumeration"""
-    
     MASCULINE = "masculine"
     FEMININE = "feminine"
     NEUTER = "neuter"
@@ -54,48 +47,36 @@ class HealthStatus(BaseModel):
 
 
 class Example(BaseModel):
-    """Example usage of a word with translation"""
-    
     text: str
-    tr: str  # translation
+    tr: str
 
 
 class Word(BaseModel):
-    """Word domain model following the comprehensive schema from issue #33"""
-
     # Core identification
-    id: Optional[str] = None  # Format: "{lang}:{lemma}:{variant_id}"
-    lemma: str  # Canonical form of the word
-    lang: str  # Language code (e.g., "de", "en")
-    
+    id: Optional[str] = None
+    lemma: str
+    lang: str
     # Part of speech information
     pos: PartOfSpeech
-    pos_specific: Optional[str] = None  # Language-specific POS (e.g., "Interjektion")
-    
+    pos_specific: Optional[str] = None
     # Definitions and synonyms
-    defs: List[str]  # Array of definitions
-    synonyms: Optional[List[str]] = None  # Array of synonyms
-    
+    defs: List[str]
+    synonyms: Optional[List[str]] = None
     # Examples
-    examples: Optional[List[Example]] = None  # Array of usage examples
-    
+    examples: Optional[List[Example]] = None
     # Difficulty and frequency
-    freq_rank: Optional[int] = None  # Frequency ranking
-    cefr: Optional[CEFRLevel] = None  # CEFR level
-    
+    freq_rank: Optional[int] = None
+    cefr: Optional[CEFRLevel] = None
     # Grammatical information
-    gender: Optional[Gender] = None  # Grammatical gender
-    plural: Optional[str] = None  # Plural form
-    
+    gender: Optional[Gender] = None
+    plural: Optional[str] = None
     # Media and source
-    audio: Optional[str] = None  # Audio URL
-    src: Optional[str] = None  # Source (e.g., "dict-api-v1")
-    
+    audio: Optional[str] = None
+    src: Optional[str] = None
     # Learning progress fields
-    success_streak: Optional[int] = None  # Number of consecutive correct answers
-    last_reviewed_at: Optional[datetime] = None  # Last time this word was reviewed
-    next_review_at: Optional[datetime] = None  # Next scheduled review time
-    
+    success_streak: Optional[int] = None
+    last_reviewed_at: Optional[datetime] = None
+    next_review_at: Optional[datetime] = None
     # Temporal tracking
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

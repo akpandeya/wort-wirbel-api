@@ -3,6 +3,6 @@ repos:
     rev: v0.4.6
     hooks:
       - id: ruff
-        args: ["check", "app", "tests"]
+        args: ["app", "tests"]
       - id: ruff-format
         args: ["app", "tests"]

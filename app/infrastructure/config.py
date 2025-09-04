@@ -29,5 +29,5 @@ class DbConfig:
 
     @property
     def connection_string(self) -> str:
-        """Get the database connection string"""
-        return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+        """Get the async database connection string for SQLAlchemy async engine"""
+        return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"

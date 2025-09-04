@@ -7,63 +7,48 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models import Word, Example
 from app.infrastructure.database.models import WordModel
 
 
 class WordRepositoryInterface(ABC):
-    """Abstract base class for Word repository"""
-
     @abstractmethod
-    def create(self, word: Word) -> Word:
-        """Create a new word"""
+    async def create(self, word: Word) -> Word:
         pass
 
     @abstractmethod
-    def get_by_id(self, word_id: str) -> Optional[Word]:
-        """Get a word by ID"""
+    async def get_by_id(self, word_id: str) -> Optional[Word]:
         pass
 
     @abstractmethod
-    def get_by_lemma(self, lemma: str, language: str) -> Optional[Word]:
-        """Get a word by lemma and language"""
+    async def get_by_lemma(self, lemma: str, language: str) -> Optional[Word]:
         pass
 
     @abstractmethod
-    def get_all(self) -> List[Word]:
-        """Get all words"""
+    async def get_all(self) -> List[Word]:
         pass
 
     @abstractmethod
-    def update(self, word: Word) -> Word:
-        """Update an existing word"""
+    async def update(self, word: Word) -> Word:
         pass
 
     @abstractmethod
-    def delete(self, word_id: str) -> bool:
-        """Delete a word by ID"""
+    async def delete(self, word_id: str) -> bool:
         pass
 
 
 class SqlWordRepository(WordRepositoryInterface):
-    """SQLAlchemy implementation of Word repository"""
-
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    def create(self, word: Word) -> Word:
-        """Create a new word"""
-        # Generate ID if not provided
+    async def create(self, word: Word) -> Word:
         if not word.id:
             word.id = self._generate_id(word.lang, word.lemma)
-        
-        # Convert examples to dict format for JSON storage
         examples_json = None
         if word.examples:
             examples_json = [{"text": ex.text, "tr": ex.tr} for ex in word.examples]
-        
         db_word = WordModel(
             id=word.id,
             lemma=word.lemma,
@@ -84,44 +69,41 @@ class SqlWordRepository(WordRepositoryInterface):
             next_review_at=word.next_review_at,
         )
         self.session.add(db_word)
-        self.session.commit()
-        self.session.refresh(db_word)
-        
+        await self.session.commit()
+        await self.session.refresh(db_word)
         return self._to_domain_model(db_word)
 
-    def get_by_id(self, word_id: str) -> Optional[Word]:
-        """Get a word by ID"""
-        db_word = self.session.query(WordModel).filter(WordModel.id == word_id).first()
+    async def get_by_id(self, word_id: str) -> Optional[Word]:
+        result = await self.session.get(WordModel, word_id)
+        return self._to_domain_model(result) if result else None
+
+    async def get_by_lemma(self, lemma: str, language: str) -> Optional[Word]:
+        from sqlalchemy import select
+
+        stmt = select(WordModel).where(
+            WordModel.lemma == lemma, WordModel.lang == language
+        )
+        result = await self.session.execute(stmt)
+        db_word = result.scalar_one_or_none()
         return self._to_domain_model(db_word) if db_word else None
 
-    def get_by_lemma(self, lemma: str, language: str) -> Optional[Word]:
-        """Get a word by lemma and language"""
-        db_word = self.session.query(WordModel).filter(
-            WordModel.lemma == lemma, 
-            WordModel.lang == language
-        ).first()
-        return self._to_domain_model(db_word) if db_word else None
+    async def get_all(self) -> List[Word]:
+        from sqlalchemy import select
 
-    def get_all(self) -> List[Word]:
-        """Get all words"""
-        db_words = self.session.query(WordModel).all()
+        stmt = select(WordModel)
+        result = await self.session.execute(stmt)
+        db_words = result.scalars().all()
         return [self._to_domain_model(db_word) for db_word in db_words]
 
-    def update(self, word: Word) -> Word:
-        """Update an existing word"""
+    async def update(self, word: Word) -> Word:
         if not word.id:
             raise ValueError("Word ID is required for update")
-        
-        db_word = self.session.query(WordModel).filter(WordModel.id == word.id).first()
+        db_word = await self.session.get(WordModel, word.id)
         if not db_word:
             raise ValueError(f"Word with ID {word.id} not found")
-        
-        # Convert examples to dict format for JSON storage
         examples_json = None
         if word.examples:
             examples_json = [{"text": ex.text, "tr": ex.tr} for ex in word.examples]
-        
-        # Update all fields
         db_word.lemma = word.lemma
         db_word.lang = word.lang
         db_word.pos = word.pos
@@ -138,35 +120,28 @@ class SqlWordRepository(WordRepositoryInterface):
         db_word.success_streak = word.success_streak
         db_word.last_reviewed_at = word.last_reviewed_at
         db_word.next_review_at = word.next_review_at
-        db_word.updated_at = datetime.now(datetime.UTC).replace(tzinfo=None)
-        
-        self.session.commit()
-        self.session.refresh(db_word)
-        
+        db_word.updated_at = datetime.now().replace(tzinfo=None)
+        await self.session.commit()
+        await self.session.refresh(db_word)
         return self._to_domain_model(db_word)
 
-    def delete(self, word_id: str) -> bool:
-        """Delete a word by ID"""
-        db_word = self.session.query(WordModel).filter(WordModel.id == word_id).first()
+    async def delete(self, word_id: str) -> bool:
+        db_word = await self.session.get(WordModel, word_id)
         if not db_word:
             return False
-        
-        self.session.delete(db_word)
-        self.session.commit()
+        await self.session.delete(db_word)
+        await self.session.commit()
         return True
 
     def _generate_id(self, lang: str, lemma: str) -> str:
-        """Generate a unique ID for the word"""
-        # Simple implementation: {lang}:{lemma}:{random_id}
         return f"{lang}:{lemma}:{str(uuid4())[:8]}"
 
     def _to_domain_model(self, db_word: WordModel) -> Word:
-        """Convert SQLAlchemy model to domain model"""
-        # Convert examples from JSON to Example objects
         examples = None
         if db_word.examples:
-            examples = [Example(text=ex["text"], tr=ex["tr"]) for ex in db_word.examples]
-        
+            examples = [
+                Example(text=ex["text"], tr=ex["tr"]) for ex in db_word.examples
+            ]
         return Word(
             id=db_word.id,
             lemma=db_word.lemma,

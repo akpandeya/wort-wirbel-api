@@ -1,18 +1,9 @@
-"""
-Test that demonstrates the comprehensive Word schema matches the spec from issue #33
-"""
-
-import json
 from datetime import datetime
 from app.domain.models import Word, PartOfSpeech, CEFRLevel, Example
 
 
 def test_word_matches_issue_33_spec():
-    """Test that Word model can represent the JSON example from issue #33"""
-    
-    # Create a word that matches the example from the issue
     examples = [Example(text="Hallo Welt!", tr="Hello world!")]
-    
     word = Word(
         id="de:hallo:1",
         lemma="Hallo",
@@ -28,10 +19,8 @@ def test_word_matches_issue_33_spec():
         plural=None,
         audio="https://cdn.example.com/audio/de/hallo.mp3",
         src="dict-api-v1",
-        updated_at=datetime.fromisoformat("2025-09-01T12:44:00")
+        updated_at=datetime.fromisoformat("2025-09-01T12:44:00"),
     )
-    
-    # Verify all fields match the specification
     assert word.id == "de:hallo:1"
     assert word.lemma == "Hallo"
     assert word.lang == "de"
@@ -48,11 +37,9 @@ def test_word_matches_issue_33_spec():
     assert word.plural is None
     assert word.audio == "https://cdn.example.com/audio/de/hallo.mp3"
     assert word.src == "dict-api-v1"
-    
-    # Test that the model can be serialized to dict (like JSON)
+
     word_dict = word.model_dump(exclude_none=True)
-    
-    # Verify key fields are present
+
     assert word_dict["id"] == "de:hallo:1"
     assert word_dict["lemma"] == "Hallo"
     assert word_dict["lang"] == "de"
@@ -64,13 +51,11 @@ def test_word_matches_issue_33_spec():
 
 
 def test_word_with_learning_fields():
-    """Test word with spaced repetition learning fields"""
-    
     from datetime import timedelta
-    
+
     now = datetime.now()
-    future = now + timedelta(days=1)  # Next day instead of hour overflow
-    
+    future = now + timedelta(days=1)
+
     word = Word(
         lemma="lernen",
         lang="de",
@@ -79,9 +64,9 @@ def test_word_with_learning_fields():
         success_streak=5,
         last_reviewed_at=now,
         next_review_at=future,
-        cefr=CEFRLevel.A2
+        cefr=CEFRLevel.A2,
     )
-    
+
     assert word.success_streak == 5
     assert word.last_reviewed_at == now
     assert word.next_review_at == future

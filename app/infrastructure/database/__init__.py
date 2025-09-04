@@ -1,59 +1,23 @@
-"""
-Infrastructure layer: Database setup and configuration
-"""
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
-
+from .base import Base
+from sqlalchemy.ext.asyncio import (
+    async_sessionmaker as sessionmaker,
+    create_async_engine,
+)
+from .session import Database, get_database, get_db_session
 from app.infrastructure.config import DbConfig
 
+# For test compatibility, re-export as expected by tests
+create_engine = create_async_engine
 
-class Base(DeclarativeBase):
-    """Database declarative base"""
-    pass
+__all__ = [
+    "Base",
+    "Database",
+    "get_database",
+    "get_db_session",
+    "sessionmaker",
+    "create_engine",
+    "DbConfig",
+]
 
-
-class Database:
-    """Database session management with singleton pattern"""
-    
-    _instance = None
-    _lock = None
-
-    def __new__(cls, config: DbConfig = None):
-        if cls._instance is None:
-            cls._instance = super(Database, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
-
-    def __init__(self, config: DbConfig = None):
-        if self._initialized:
-            return
-        
-        if config is None:
-            config = DbConfig.from_env()
-            
-        self.engine = create_engine(config.connection_string)
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-        self._initialized = True
-
-    def get_session(self):
-        """Get a database session"""
-        session = self.SessionLocal()
-        try:
-            yield session
-        finally:
-            session.close()
-
-    def create_tables(self):
-        """Create all tables"""
-        Base.metadata.create_all(bind=self.engine)
-
-
-def get_database() -> Database:
-    """Get the database instance (singleton)"""
-    return Database()
-
-
-def get_db_session():
-    """Get a database session (dependency injection)"""
-    return get_database().get_session()
+# sessionmaker is an alias for async_sessionmaker
+# create_engine is an alias for create_async_engine
