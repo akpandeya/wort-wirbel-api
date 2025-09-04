@@ -15,6 +15,10 @@ packages = [{include = "app"}]
 python = "^3.13"
 fastapi = "^0.116.1"
 uvicorn = {extras = ["standard"], version = "^0.35.0"}
+sqlalchemy = "^2.0.0"
+alembic = "^1.13.0"
+psycopg = {extras = ["binary"], version = "^3.1.18"}
+asyncpg = "^0.30.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
@@ -23,6 +27,7 @@ pytest-asyncio = "^0.21.1"
 httpx = "^0.25.2"
 ruff = "^0.12.11"
 pre-commit = "^4.3.0"
+testcontainers = {extras = ["postgres"], version = "^4.4.0"}
 
 
 [tool.black]
@@ -64,6 +69,7 @@ addopts = [
     "--cov-report=html",
     "--cov-fail-under=80",
 ]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["app"]
